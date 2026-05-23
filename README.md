@@ -126,6 +126,41 @@ uv run python agent6.py 'What is my favorite color?'
 uv run python agent6.py 'Search for Python asyncio tutorials and summarize the top result'
 ```
 
+#### Sample output
+```bash
+============================================================
+Agent Session: b016afbd-9b6f-453b-8e70-f75f79b3f924
+User: Say my name
+============================================================
+
+
+--- Iteration 1 ---
+→ Perception: Analyzing user intent...
+  Intent: memory_recall
+  Query: Recall user's name
+  Confidence: 0.95
+
+→ Memory: Processing memory operations...
+  Found 2 relevant memories:
+1. [fact] my name is Bob
+2. [fact] my name is Alice
+
+→ Decision: Planning actions...
+  Planned 1 action(s)
+  Reasoning: Fallback decision for memory_recall
+  Complete: True
+
+→ Action 1/1: respond
+  Reasoning: Respond with retrieved memories
+  Generated final response
+
+============================================================
+Agent completed in 1 iteration(s)
+Final response:
+I recall: my name is Bob
+============================================================
+```
+
 ## File Structure
 
 ```
