@@ -45,16 +45,6 @@ User Query
           Loop or Respond
 ```
 
-## Requirements Met
-
-- ✅ Four code modules with clear separation: `memory.py`, `perception.py`, `decision.py`, `action.py`
-- ✅ Main agent loop: `agent6.py`
-- ✅ Pydantic v2 contracts: `schemas.py`
-- ✅ Memory persists across runs in `state/`
-- ✅ All LLM calls via LLM Gateway V3
-- ✅ All tool calls via MCP server (stdio transport)
-- ✅ No third-party agentic frameworks
-- ✅ uv for dependency management
 
 ## Setup
 
