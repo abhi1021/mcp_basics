@@ -68,7 +68,7 @@ async def process_perception(
         prompt,
         auto_route="perception",
         temperature=0.3,
-        max_tokens=500
+        max_tokens=2048
     )
 
     # Parse the LLM response

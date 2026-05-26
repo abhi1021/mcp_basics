@@ -252,8 +252,7 @@ def create_file(path: str, content: str) -> dict:
     p = _safe(path)
     if p.exists():
         raise ValueError(f"File '{path}' already exists")
-    if not p.parent.exists():
-        raise ValueError(f"Parent directory of '{path}' does not exist")
+    p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(content, encoding="utf-8")
     return {"ok": True, "path": path, "size_bytes": p.stat().st_size}
 

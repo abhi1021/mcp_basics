@@ -23,7 +23,7 @@ gateway_path = str(Path(__file__).parent / "llm_gatewayV3")
 if gateway_path not in sys.path:
     sys.path.append(gateway_path)
 
-from client import LLM
+from llm_gatewayV3.client import LLM
 
 from action import ActionExecutor, process_action
 from decision import process_decision
@@ -269,8 +269,8 @@ class Agent:
             for i, action in enumerate(state.actions, 1):
                 if action.tool_result and action.tool_result.success:
                     result_str = str(action.tool_result.result)
-                    if len(result_str) > 500:
-                        result_str = result_str[:500] + "..."
+                    if len(result_str) > 10000:
+                        result_str = result_str[:10000] + "..."
                     context_parts.append(f"{i}. {action.action_type.value}: {result_str}")
 
         context = "\n".join(context_parts)
@@ -285,7 +285,7 @@ Do not mention internal processes, tools, or iterations. Just answer the questio
                 prompt,
                 auto_route="decision",
                 temperature=0.7,
-                max_tokens=500
+                max_tokens=1000
             )
             return response.get("text", "").strip()
         except Exception as e:

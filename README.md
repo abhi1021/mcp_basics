@@ -99,51 +99,227 @@ curl -s http://localhost:8101/v1/routers
 uv run python agent6.py '<your query>'
 ```
 
-### Example Queries
+### 4 Example Queries
 
-#### Query A: Factual Lookup
+#### Query A. Shannon Wikipedia (artifact attach test)
 ```bash
-uv run python agent6.py 'What is the capital of France?'
-```
+> uv run python agent6.py "Fetch https://en.wikipedia.org/wiki/Claude_Shannon and tell me his birth date, death date, and three key contributions to information theory."                                               INT py base 10:51:37
 
-#### Query B: Time Query
-```bash
-uv run python agent6.py 'What time is it in Tokyo?'
-```
-
-#### Query C: Memory Persistence (Run 1 - Store)
-```bash
-uv run python agent6.py 'Remember that my favorite color is blue'
-```
-
-#### Query C: Memory Persistence (Run 2 - Recall)
-```bash
-uv run python agent6.py 'What is my favorite color?'
-```
-
-#### Query D: Search and Summarize
-```bash
-uv run python agent6.py 'Search for Python asyncio tutorials and summarize the top result'
-```
-
-#### Sample output
-```bash
 ============================================================
-Agent Session: b016afbd-9b6f-453b-8e70-f75f79b3f924
-User: Say my name
+Agent Session: 238c2084-b0bd-4ee0-9bc3-5bc0eab70e86
+User: Fetch https://en.wikipedia.org/wiki/Claude_Shannon and tell me his birth date, death date, and three key contributions to information theory.
+============================================================
+
+
+--- Iteration 1 ---
+→ Perception: Analyzing user intent...
+Warning: Failed to parse LLM response: No JSON found in response
+Response was: ```json
+{
+  "intent_type": "multi_step_task",
+  Intent: factual_query
+  Query: Fetch https://en.wikipedia.org/wiki/Claude_Shannon and tell me his birth date, death date, and three key contributions to information theory.
+  Confidence: 0.50
+
+→ Memory: Processing memory operations...
+  No relevant memories found.
+
+→ Decision: Planning actions...
+  Planned 3 action(s)
+  Reasoning: The user asked for specific biographical details and contributions. We need to fetch the Wikipedia page to get accurate data. The plan involves searching for the page, fetching it, and then responding.
+  Complete: False
+
+→ Action 1/3: web_search
+  Reasoning: Search the web to locate the correct Wikipedia page URL for Claude Shannon.
+[05/26/26 19:12:49] INFO     Processing request of type CallToolRequest                                                                                                                                                                                              server.py:727
+[05/26/26 19:12:50] INFO     Processing request of type ListToolsRequest                                                                                                                                                                                             server.py:727
+  Success: web_search
+
+→ Action 2/3: fetch_url
+  Reasoning: Retrieve the content of Claude Shannon's Wikipedia page to extract birth date, death date, and key contributions.
+                    INFO     Processing request of type CallToolRequest                                                                                                                                                                                              server.py:727
+[INIT].... → Crawl4AI 0.8.6 
+[FETCH]... ↓ https://en.wikipedia.org/wiki/Claude_Shannon                                                         | ✓ | ⏱: 1.90s 
+[SCRAPE].. ◆ https://en.wikipedia.org/wiki/Claude_Shannon                                                         | ✓ | ⏱: 0.28s 
+[COMPLETE] ● https://en.wikipedia.org/wiki/Claude_Shannon                                                         | ✓ | ⏱: 2.20s 
+  Success: fetch_url
+
+→ Action 3/3: respond
+  Reasoning: After obtaining the necessary information, provide the final answer to the user.
+  Generated final response
+
+============================================================
+Agent completed in 1 iteration(s)
+Final response:
+**Claude Elwood Shannon**  
+- **Birth:** April 30 1916  
+- **Death:** February 24 2001  
+
+**Three key contributions to information theory**
+
+1. **Shannon entropy** – In his 1948 paper *“A Mathematical Theory of Communication,”* Shannon introduced the concept of entropy as a quantitative measure of information, laying the foundation for the entire field.  
+2. **Channel capacity theorem** – He proved the maximum rate at which information can be transmitted over a noisy channel, establishing the theoretical limits of communication systems.  
+3. **The bit as the fundamental unit** – Shannon defined the binary digit (bit) as the basic unit of information, formalizing the binary representation of data that underpins modern digital communications and computing.
+============================================================
+
+
+FINAL ANSWER: **Claude Elwood Shannon**  
+- **Birth:** April 30 1916  
+- **Death:** February 24 2001  
+
+**Three key contributions to information theory**
+
+1. **Shannon entropy** – In his 1948 paper *“A Mathematical Theory of Communication,”* Shannon introduced the concept of entropy as a quantitative measure of information, laying the foundation for the entire field.  
+2. **Channel capacity theorem** – He proved the maximum rate at which information can be transmitted over a noisy channel, establishing the theoretical limits of communication systems.  
+3. **The bit as the fundamental unit** – Shannon defined the binary digit (bit) as the basic unit of information, formalizing the binary representation of data that underpins modern digital communications and computing.
+```
+
+#### Query B: Tokyo activities with weather constraint (multi-goal plus memory carryover)
+```bash
+uv run python agent6.py "Find 3 family-friendly things to do in Tokyo this weekend. Check Saturday's weather forecast there and tell me which one is most appropriate."
+
+============================================================
+Agent Session: 72a4d6ca-4ac5-40ae-8ec3-a018666cb59d
+User: Find 3 family-friendly things to do in Tokyo this weekend. Check Saturday's weather forecast there and tell me which one is most appropriate.
+============================================================
+
+
+--- Iteration 1 ---
+→ Perception: Analyzing user intent...
+  Intent: multi_step_task
+  Query: Find 3 family-friendly activities in Tokyo for this weekend, check Saturday's weather forecast, and recommend the most suitable one.
+  Confidence: 0.95
+
+→ Memory: Processing memory operations...
+  No relevant memories found.
+
+→ Decision: Planning actions...
+  Planned 4 action(s)
+  Reasoning: The user needs information on activities and weather to make a recommendation. We first get the current date, then search for activities and weather, and finally respond.
+  Complete: False
+
+→ Action 1/4: get_time
+  Reasoning: Determine the current date to identify the upcoming Saturday for the weather forecast.
+[05/26/26 19:20:05] INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+                    INFO     Processing request of type ListToolsRequest                                                                                                                                                                        server.py:727
+  Success: get_time
+
+→ Action 2/4: web_search
+  Reasoning: Find a list of suitable family-friendly activities happening in Tokyo over the weekend.
+                    INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+  Success: web_search
+
+→ Action 3/4: web_search
+  Reasoning: Retrieve the weather forecast for Saturday to evaluate which activity is most suitable.
+[05/26/26 19:20:07] INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+  Success: web_search
+
+→ Action 4/4: respond
+  Reasoning: After gathering activity options and weather info, provide a recommendation.
+  Generated final response
+
+============================================================
+Agent completed in 1 iteration(s)
+Final response:
+**Family‑friendly Tokyo plans for the coming Saturday (May 30, 2026)**  
+
+| # | Activity | Why it’s great for families | Notes |
+|---|----------|-----------------------------|-------|
+| **1** | **Ueno Park – Zoo & National Museum of Nature & Science** |  •  Wide open lawns for running and picnics.<br>•  Ueno Zoo has elephants, giraffes, and hippos that kids love.<br>•  The museum offers hands‑on dinosaur and space exhibits that keep children curious. |  All free admission.  Great for a sunny day. |
+| **2** | **Miraikan (National Museum of Emerging Science & Innovation) – Odaiba** |  •  Interactive exhibits on robotics, space, and future tech.<br>•  Kids can try hands‑on displays and learn through play.<br>•  Indoor setting protects from any sudden showers. |  Ticket price ≈ ¥1,800.  Ideal for a rainy‑proof alternative. |
+| **3** | **Family Sumo Workshop & Show at Ryogoku Kokugikan** |  •  Kids can try a short sumo match, learn the rules, and watch a live bout.<br>•  Adds a cultural twist to the day. |  Ticket + workshop ≈ ¥8,000–¥10,000.  Book in advance. |
+
+### Which is most suitable for Saturday’s weather?
+Saturday’s forecast is **mostly sunny with light clouds** (≈ 26 °C).  
+**Ueno Park** is the best match—open air, plenty of shade, and plenty of space for children to run around while the family enjoys the zoo and museum.  
+
+Enjoy your weekend in Tokyo!
+============================================================
+
+
+FINAL ANSWER: **Family‑friendly Tokyo plans for the coming Saturday (May 30, 2026)**  
+
+| # | Activity | Why it’s great for families | Notes |
+|---|----------|-----------------------------|-------|
+| **1** | **Ueno Park – Zoo & National Museum of Nature & Science** |  •  Wide open lawns for running and picnics.<br>•  Ueno Zoo has elephants, giraffes, and hippos that kids love.<br>•  The museum offers hands‑on dinosaur and space exhibits that keep children curious. |  All free admission.  Great for a sunny day. |
+| **2** | **Miraikan (National Museum of Emerging Science & Innovation) – Odaiba** |  •  Interactive exhibits on robotics, space, and future tech.<br>•  Kids can try hands‑on displays and learn through play.<br>•  Indoor setting protects from any sudden showers. |  Ticket price ≈ ¥1,800.  Ideal for a rainy‑proof alternative. |
+| **3** | **Family Sumo Workshop & Show at Ryogoku Kokugikan** |  •  Kids can try a short sumo match, learn the rules, and watch a live bout.<br>•  Adds a cultural twist to the day. |  Ticket + workshop ≈ ¥8,000–¥10,000.  Book in advance. |
+
+### Which is most suitable for Saturday’s weather?
+Saturday’s forecast is **mostly sunny with light clouds** (≈ 26 °C).  
+**Ueno Park** is the best match—open air, plenty of shade, and plenty of space for children to run around while the family enjoys the zoo and museum.  
+
+Enjoy your weekend in Tokyo!
+```
+
+#### Query C. Mom's birthday (durable memory across two runs)
+
+##### Run 1
+```bash
+uv run python agent6.py  "My moms birthday is 15 June 2026. Remember that and give me a calendar reminder for two weeks before and on the day."
+
+============================================================
+Agent Session: 5d439208-9411-4e5a-85dc-62d6e6633378
+User: My moms birthday is 15 June 2026. Remember that and give me a calendar reminder for two weeks before and on the day.
+============================================================
+
+
+--- Iteration 1 ---
+→ Perception: Analyzing user intent...
+  Intent: memory_store
+  Query: Remember that my mom's birthday is June 15 2026 and set calendar reminders for two weeks before and on that day.
+  Confidence: 0.96
+
+→ Memory: Processing memory operations...
+  Stored: Remember that my mom's birthday is June 15 2026 and set calendar reminders for two weeks before and on that day.
+
+→ Decision: Planning actions...
+  Planned 3 action(s)
+  Reasoning: The user's request to remember the birthday and set reminders has been fulfilled by storing the memory, creating a reminder file, and confirming back to the user.
+  Complete: True
+
+→ Action 1/3: store_memory
+  Reasoning: Persist the user-provided birthday information for future recall.
+  Memory stored
+
+→ Action 2/3: create_file
+  Reasoning: Create a file to represent the calendar reminders as requested.
+[05/26/26 21:54:34] INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+                    INFO     Processing request of type ListToolsRequest                                                                                                                                                                        server.py:727
+  Success: create_file
+
+→ Action 3/3: respond
+  Reasoning: Provide confirmation to the user that the information has been stored and reminders have been recorded.
+  Generated final response
+
+============================================================
+Agent completed in 1 iteration(s)
+Final response:
+I've stored that information: Remember that my mom's birthday is June 15 2026 and set calendar reminders for two weeks before and on that day.
+============================================================
+
+
+FINAL ANSWER: I've stored that information: Remember that my mom's birthday is June 15 2026 and set calendar reminders for two weeks before and on that day.
+```
+
+##### Run 2
+```bash
+uv run python agent6.py  "When is mom's birthday?"
+
+============================================================
+Agent Session: be1dde22-e30c-4c74-b64c-53bd09c47833
+User: When is mom's birthday?
 ============================================================
 
 
 --- Iteration 1 ---
 → Perception: Analyzing user intent...
   Intent: memory_recall
-  Query: Recall user's name
-  Confidence: 0.95
+  Query: when is mom's birthday
+  Confidence: 0.96
 
 → Memory: Processing memory operations...
-  Found 2 relevant memories:
-1. [fact] my name is Bob
-2. [fact] my name is Alice
+  Found 1 relevant memory: Remember that my mom's birthday is June 15 2026 and set calendar reminders for two weeks before and on that day.
 
 → Decision: Planning actions...
   Planned 1 action(s)
@@ -157,9 +333,144 @@ User: Say my name
 ============================================================
 Agent completed in 1 iteration(s)
 Final response:
-I recall: my name is Bob
+I recall: Remember that my mom's birthday is June 15 2026 and set calendar reminders for two weeks before and on that day.
 ============================================================
+
+
+FINAL ANSWER: I recall: Remember that my mom's birthday is June 15 2026 and set calendar reminders for two weeks before and on that day.
 ```
+
+#### Query D. Asyncio research (multi-source synthesis)
+```bash
+uv run python agent6.py  "Search for 'Python asyncio best practices', read the top 3 results, and give me a short numbered list of the advice they agree on."
+
+============================================================
+Agent Session: ba5c51a4-8798-4fb1-bfd2-14dde65f6dcd
+User: Search for 'Python asyncio best practices', read the top 3 results, and give me a short numbered list of the advice they agree on.
+============================================================
+
+
+--- Iteration 1 ---
+→ Perception: Analyzing user intent...
+  Intent: search_and_summarize
+  Query: Search for Python asyncio best practices, read the top 3 results, and provide a short numbered list of the advice they agree on.
+  Confidence: 0.99
+
+→ Memory: Processing memory operations...
+  Found 1 relevant memory: Remember that my mom's birthday is June 15 2026 and set calendar reminders for two weeks before and on that day.
+
+→ Decision: Planning actions...
+  Planned 4 action(s)
+  Reasoning: We need to gather the top three web pages on Python asyncio best practices, read their content, and then synthesize the overlapping recommendations into a concise numbered list. The planned actions first obtain the URLs via a search, then retrieve each page's content. After these fetches succeed, we can analyze the text and respond to the user with the agreed‑upon advice.
+  Complete: False
+
+→ Action 1/4: web_search
+  Reasoning: Search the web to obtain a list of recent, authoritative articles or guides that discuss best practices for using Python's asyncio library.
+[05/26/26 22:00:36] INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+[05/26/26 22:00:38] INFO     Processing request of type ListToolsRequest                                                                                                                                                                        server.py:727
+  Success: web_search
+
+→ Action 2/4: fetch_url
+  Reasoning: Fetch the full content of the first search result so we can extract the advice it provides.
+                    INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+  Success: fetch_url
+
+→ Action 3/4: fetch_url
+  Reasoning: Fetch the full content of the second search result to compare its recommendations with the others.
+                    INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+  Success: fetch_url
+
+→ Action 4/4: fetch_url
+  Reasoning: Fetch the full content of the third search result to have three sources for cross‑checking common best‑practice advice.
+                    INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+  Success: fetch_url
+
+--- Iteration 2 ---
+
+→ Memory: Processing memory operations...
+  Found 1 relevant memory: Remember that my mom's birthday is June 15 2026 and set calendar reminders for two weeks before and on that day.
+
+→ Decision: Planning actions...
+  Planned 3 action(s)
+  Reasoning: We need the full content of the top three search results before we can identify the overlapping advice and produce the requested numbered list. After fetching these URLs, we will analyze the content and respond with the summary.
+  Complete: False
+
+→ Action 1/3: fetch_url
+  Reasoning: Fetch the first search result to extract its asyncio best‑practice advice.
+[05/26/26 22:00:50] INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+[INIT].... → Crawl4AI 0.8.6 
+[FETCH]... ↓ https://www.shanechang.com/p/python-asyncio-best-practices-pitfalls                                  | ✓ | ⏱: 4.64s 
+[SCRAPE].. ◆ https://www.shanechang.com/p/python-asyncio-best-practices-pitfalls                                  | ✓ | ⏱: 0.02s 
+[COMPLETE] ● https://www.shanechang.com/p/python-asyncio-best-practices-pitfalls                                  | ✓ | ⏱: 4.67s 
+  Success: fetch_url
+
+→ Action 2/3: fetch_url
+  Reasoning: Fetch the second search result to extract its asyncio best‑practice advice.
+[05/26/26 22:00:57] INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+[INIT].... → Crawl4AI 0.8.6 
+[FETCH]... ↓ https://discuss.python.org/t/asyncio-best-practices/12576                                            | ✓ | ⏱: 4.22s 
+[SCRAPE].. ◆ https://discuss.python.org/t/asyncio-best-practices/12576                                            | ✓ | ⏱: 0.03s 
+[COMPLETE] ● https://discuss.python.org/t/asyncio-best-practices/12576                                            | ✓ | ⏱: 4.26s 
+  Success: fetch_url
+
+→ Action 3/3: fetch_url
+  Reasoning: Fetch the third search result to extract its asyncio best‑practice advice.
+[05/26/26 22:01:02] INFO     Processing request of type CallToolRequest                                                                                                                                                                         server.py:727
+[INIT].... → Crawl4AI 0.8.6 
+[FETCH]... ↓ https://docs.python.org/3/library/asyncio-dev.html                                                   | ✓ | ⏱: 1.96s 
+[SCRAPE].. ◆ https://docs.python.org/3/library/asyncio-dev.html                                                   | ✓ | ⏱: 0.04s 
+[COMPLETE] ● https://docs.python.org/3/library/asyncio-dev.html                                                   | ✓ | ⏱: 2.01s 
+  Success: fetch_url
+
+--- Iteration 3 ---
+
+→ Memory: Processing memory operations...
+  Found 1 relevant memory: Remember that my mom's birthday is June 15 2026 and set calendar reminders for two weeks before and on that day.
+
+→ Decision: Planning actions...
+  Planned 1 action(s)
+  Reasoning: The required information has been extracted from the fetched pages and summarized into a concise numbered list. No further tool calls are needed.
+  Complete: True
+
+→ Action 1/1: respond
+  Reasoning: All three sources (Shane's blog, the Async‑SIG discussion, and the official Python docs) emphasize these practices as fundamental to reliable asyncio programs.
+  Generated final response
+
+============================================================
+Agent completed in 3 iteration(s)
+Final response:
+**Common advice from the top three sources**
+
+1. **Start your program with `asyncio.run()` (or an equivalent entry‑point).**  
+   It creates, configures, and cleanly shuts down the event loop for you.
+
+2. **Never forget to `await` a coroutine.**  
+   Always use `await` (or schedule the coroutine as a task) so that the coroutine actually runs and you avoid “never‑awaited” warnings.
+
+3. **Don’t block the event loop with long‑running or synchronous code.**  
+   Break up heavy loops into smaller async steps, or off‑load blocking work to a thread/process pool with `loop.run_in_executor` / `asyncio.to_thread`.
+
+4. **Use tasks (`asyncio.create_task`, `await asyncio.gather`, etc.) for concurrency.**  
+   Scheduling work as tasks lets the event loop interleave execution safely rather than manually driving the loop.
+============================================================
+
+
+FINAL ANSWER: **Common advice from the top three sources**
+
+1. **Start your program with `asyncio.run()` (or an equivalent entry‑point).**  
+   It creates, configures, and cleanly shuts down the event loop for you.
+
+2. **Never forget to `await` a coroutine.**  
+   Always use `await` (or schedule the coroutine as a task) so that the coroutine actually runs and you avoid “never‑awaited” warnings.
+
+3. **Don’t block the event loop with long‑running or synchronous code.**  
+   Break up heavy loops into smaller async steps, or off‑load blocking work to a thread/process pool with `loop.run_in_executor` / `asyncio.to_thread`.
+
+4. **Use tasks (`asyncio.create_task`, `await asyncio.gather`, etc.) for concurrency.**  
+   Scheduling work as tasks lets the event loop interleave execution safely rather than manually driving the loop.
+```
+
+
 
 ## File Structure
 

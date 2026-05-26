@@ -50,7 +50,10 @@ class MemoryManager:
                 if line:
                     try:
                         data = json.loads(line)
-                        memories.append(MemoryEntry.model_validate(data))
+                        entry = MemoryEntry.model_validate(data)
+                        if entry.timestamp.tzinfo is None:
+                            entry.timestamp = entry.timestamp.replace(tzinfo=UTC)
+                        memories.append(entry)
                     except (json.JSONDecodeError, Exception) as e:
                         print(f"Warning: Failed to parse memory line: {e}")
 

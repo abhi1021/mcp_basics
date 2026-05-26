@@ -32,14 +32,26 @@ class LLM:
         }
         body = {k: v for k, v in body.items() if v is not None}
         r = httpx.post(f"{self.base_url}/v1/chat", json=body, timeout=self.timeout)
-        r.raise_for_status()
+        try:
+            r.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            if r.status_code == 503:
+                try:
+                    detail = r.json()
+                    if isinstance(detail, dict) and "detail" in detail:
+                        detail = detail["detail"]
+                    raise httpx.HTTPStatusError(f"503 Service Unavailable: {detail}", request=e.request, response=e.response) from None
+                except Exception:
+                    pass
+            raise
         return r.json()
 
     def stream(self, prompt: str = None, *, messages=None, system=None,
                provider: str = None, model: str = None,
                max_tokens: int = 2048, temperature: float = 0.7,
                tools=None, tool_choice=None,
-               cache_system=None, reasoning=None, response_format=None):
+               cache_system=None, reasoning=None, response_format=None,
+               auto_route: Optional[str] = None):
         body = {
             "prompt": prompt, "messages": messages, "system": system,
             "provider": provider, "model": model,
@@ -47,6 +59,7 @@ class LLM:
             "tools": tools, "tool_choice": tool_choice,
             "cache_system": cache_system, "reasoning": reasoning,
             "response_format": response_format,
+            "auto_route": auto_route,
         }
         body = {k: v for k, v in body.items() if v is not None}
         with httpx.stream("POST", f"{self.base_url}/v1/chat", json=body, timeout=self.timeout) as r:

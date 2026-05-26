@@ -26,8 +26,8 @@ PORT = int(os.getenv("GATEWAY_V3_PORT", "8101"))
 # Tier -> worker failover order. TINY prefers small fast workers; LARGE prefers
 # long-context Gemini; HUGE is rejected (Summarizer Agent will live in V7).
 TIER_TO_ORDER = {
-    "TINY":  ["github", "openrouter", "groq", "nvidia", "cerebras", "gemini", "ollama"],
-    "LARGE": ["gemini", "groq", "nvidia", "cerebras", "github", "openrouter", "ollama"],
+    "TINY":  ["ollama", "github", "openrouter", "groq", "nvidia", "cerebras", "gemini"],
+    "LARGE": ["ollama", "gemini", "groq", "nvidia", "cerebras", "github", "openrouter"],
 }
 
 # Router envelope: cap the sample at ~800 chars (first 400 + last 400).
@@ -293,6 +293,9 @@ async def chat(req: ChatRequest):
         # what's actually wired in this gateway.
         tier_order = TIER_TO_ORDER[router_decision.tier]
         candidates = [p for p in tier_order if p in router.providers]
+        # If no candidates from tier order are available, fallback to all available providers
+        if not candidates:
+            candidates = list(router.order)
     else:
         candidates = router.candidates(req.provider) if req.provider else list(router.order)
 

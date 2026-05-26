@@ -72,7 +72,9 @@ IMPORTANT:
 - If previous actions have already answered the question, set is_complete=true and include a "respond" action
 - For memory_store intents, use store_memory action
 - For memory_recall intents, check if memory_summary has the answer, then respond
+- If the user asks to create or set calendar reminders, record them by writing a file inside the sandbox (e.g. using "create_file" with a path like "reminders/mom_birthday_2026.txt" containing the birthday and the requested reminder dates).
 - Always end with a "respond" action when the task is complete
+- You must strictly output one of the available action types listed above. Do not invent any new action_type.
 """
 
 
@@ -86,16 +88,21 @@ async def process_decision(
     Plans next actions based on intent, memory, and previous actions.
     """
     # For simple intents, use fallback directly to avoid LLM issues
-    if decision_input.intent.intent_type in (IntentType.MEMORY_STORE, IntentType.MEMORY_RECALL):
+    # But if the query contains reminder/calendar keywords, we need complex planning (e.g. creating files)!
+    needs_complex_planning = any(word in decision_input.intent.query.lower() for word in ["reminder", "calendar", "remind", "schedule", "file"])
+    if decision_input.intent.intent_type in (IntentType.MEMORY_STORE, IntentType.MEMORY_RECALL) and not needs_complex_planning:
         return _create_fallback_decision(decision_input)
 
     # Format previous actions
     prev_actions_text = "None yet"
     if decision_input.previous_actions:
-        prev_actions_text = "\n".join([
-            f"- {i+1}. {act.get('action_type', 'unknown')}: {act.get('summary', str(act))}"
-            for i, act in enumerate(decision_input.previous_actions)
-        ])
+        formatted = []
+        for i, act in enumerate(decision_input.previous_actions):
+            item = f"- {i+1}. {act.get('action_type', 'unknown')}: {act.get('summary', str(act))}"
+            if "result" in act:
+                item += f"\n   Result: {json.dumps(act['result'])}"
+            formatted.append(item)
+        prev_actions_text = "\n".join(formatted)
 
     prompt = DECISION_PROMPT.format(
         intent_type=decision_input.intent.intent_type.value,
@@ -111,7 +118,7 @@ async def process_decision(
             prompt,
             auto_route="decision",
             temperature=0.4,
-            max_tokens=1000
+            max_tokens=2048
         )
     except Exception as e:
         print(f"Warning: LLM decision failed ({e}), using fallback")
